@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monte Carlo Neutron Transport Simulator | Jose Alfaro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --text: #333;
+            --text-light: #7f8c8d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: #f9f9f9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--dark));
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.05)"/></svg>');
+            background-size: cover;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 1.4rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.8rem;
+            background: var(--secondary);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            background: #2980b9;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid white;
+        }
+        
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary);
+        }
+        
+        /* Sections */
+        section {
+            padding: 5rem 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: var(--secondary);
+            margin: 1rem auto;
+            border-radius: 2px;
+        }
+        
+        .section-light {
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        /* Skills */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .skill-category {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .skill-category:hover {
+            transform: translateY(-5px);
+        }
+        
+        .skill-category h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .skill-category ul {
+            list-style: none;
+        }
+        
+        .skill-category li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .skill-category li:last-child {
+            border-bottom: none;
+        }
+        
+        .skill-category li i {
+            color: var(--secondary);
+        }
+        
+        /* Project Parts */
+        .project-part {
+            margin-bottom: 4rem;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .part-header {
+            background: var(--primary);
+            color: white;
+            padding: 1.5rem 2rem;
+        }
+        
+        .part-content {
+            padding: 2rem;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .result-card {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .result-card h4 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: var(--primary);
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        /* Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin: 0.5rem 0;
+        }
+        
+        .metric-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            color: var(--secondary);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+            
+            section {
+                padding: 3rem 0;
+            }
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
+        }
+        
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+    <!-- Back to Portfolio Button -->
+    <div class="back-to-portfolio">
+        <a href="https://jmalfaro2019.github.io/jmalfaro2019/" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Portfolio
+        </a>
+    </div>
+
+    <style>
+    .back-to-portfolio {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.7rem 1.5rem;
+        background: #2c3e50;
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        font-size: 0.9rem;
+    }
+
+    .back-btn:hover {
+        background: #3498db;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    </style>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>Monte Carlo Neutron Transport Simulator</h1>
+                <p class="subtitle">Criticality Analysis of Natural Uranium with Monte Carlo Methods</p>
+                <div class="btn-group">
+                    <a href="https://github.com/jmalfaro2019/PROJET" class="btn" target="_blank">
+                        <i class="fab fa-github"></i> View Code on GitHub
+                    </a>
+                    <a href="docs/Rapport_eng.pdf" class="btn btn-outline" target="_blank">
+                        <i class="fas fa-file-pdf"></i> Download PDF Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Resumen -->
+    <section class="section-light">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Project Overview</h2>
+            </div>
+            <div class="fade-in delay-1">
+                <p>This scientific computing project applies probabilistic Monte Carlo methods to study the criticality of Natural Uranium (0.7% U-235). Starting from a simplified mathematical model, the project evolves into a physically accurate engine that integrates continuous energy dependence, nuclear cross-sections based on ENDF data, and the Watt Spectrum for fission neutron energy distribution.</p>
+                
+                <p>The simulation correctly validates that natural uranium in an infinite medium is subcritical (k_eff &lt; 1) due to the resonance capture phenomenon in U-238, demonstrating the "resonance trap" effect that prevents sustained chain reactions.</p>
+            </div>
+            
+            <div class="metrics-grid fade-in delay-2">
+                <div class="metric-card">
+                    <i class="fas fa-atom fa-2x"></i>
+                    <div class="metric-value">1000</div>
+                    <div class="metric-label">Initial Neutrons</div>
+                </div>
+                <div class="metric-card">
+                    <i class="fas fa-layer-group fa-2x"></i>
+                    <div class="metric-value">500</div>
+                    <div class="metric-label">Generations Simulated</div>
+                </div>
+                <div class="metric-card">
+                    <i class="fas fa-calculator fa-2x"></i>
+                    <div class="metric-value">~0.983</div>
+                    <div class="metric-label">Effective Multiplication Factor (k_eff)</div>
+                </div>
+                <div class="metric-card">
+                    <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    <div class="metric-value">Subcritical</div>
+                    <div class="metric-label">Reactor State</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Habilidades -->
+    <section>
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Skills & Technologies</h2>
+            </div>
+            <div class="skills-grid">
+                <div class="skill-category fade-in">
+                    <h3><i class="fas fa-code"></i> Languages & Libraries</h3>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Python</li>
+                        <li><i class="fas fa-check"></i> NumPy</li>
+                        <li><i class="fas fa-check"></i> SciPy</li>
+                        <li><i class="fas fa-check"></i> Matplotlib</li>
+                        <li><i class="fas fa-check"></i> Jupyter Notebook</li>
+                    </ul>
+                </div>
+                <div class="skill-category fade-in delay-1">
+                    <h3><i class="fas fa-cogs"></i> Technical Concepts</h3>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Monte Carlo Methods</li>
+                        <li><i class="fas fa-check"></i> Nuclear Cross-Sections</li>
+                        <li><i class="fas fa-check"></i> Watt Spectrum Sampling</li>
+                        <li><i class="fas fa-check"></i> Neutron Transport</li>
+                        <li><i class="fas fa-check"></i> Resonance Capture</li>
+                        <li><i class="fas fa-check"></i> Criticality Analysis</li>
+                    </ul>
+                </div>
+                <div class="skill-category fade-in delay-2">
+                    <h3><i class="fas fa-tasks"></i> Methodologies</h3>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Statistical Modeling</li>
+                        <li><i class="fas fa-check"></i> Numerical Integration</li>
+                        <li><i class="fas fa-check"></i> Interpolation of Experimental Data</li>
+                        <li><i class="fas fa-check"></i> Random Walk Algorithms</li>
+                        <li><i class="fas fa-check"></i> Inverse Transform Sampling</li>
+                        <li><i class="fas fa-check"></i> Scientific Visualization</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Parte 1: Physics Engine -->
+    <section class="section-light">
+        <div class="container">
+            <div class="project-part fade-in">
+                <div class="part-header">
+                    <h2><i class="fas fa-atom"></i> Part 1: Physics Engine</h2>
+                </div>
+                <div class="part-content">
+                    <h3>Nuclear Data Foundation</h3>
+                    <p>The physics engine is built on nuclear cross-section data based on ENDF/B-VIII evaluations for both U-235 and U-238 isotopes. Cross-sections for fission, radiative capture, elastic scattering, and inelastic scattering are stored on logarithmic energy grids spanning from 1e-5 eV (thermal) to 20 MeV (fast).</p>
+                    
+                    <h3>Energy-Dependent Cross-Sections</h3>
+                    <ul>
+                        <li><strong>U-235 thermal fission</strong>: ~584 barns at 0.0253 eV</li>
+                        <li><strong>U-238 fission threshold</strong>: negligible below 1 MeV</li>
+                        <li><strong>Resonance region</strong>: U-238 capture peaks around 10 eV</li>
+                        <li><strong>Inelastic scattering</strong>: threshold at ~40-45 keV for both isotopes</li>
+                    </ul>
+                    
+                    <h3>Watt Spectrum Implementation</h3>
+                    <p>Fission neutron energies are sampled from the Watt Spectrum using rejection sampling:</p>
+                    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 8px; overflow-x: auto;">
+f(E) = C e^(-aE) sinh(sqrt(bE))
+with a = 0.988, b = 2.249 (MeV^-1)</pre>
+                    
+                    <div class="results-grid">
+                        <div class="result-card">
+                            <h4>Log-Log Interpolation</h4>
+                            <p>Cross-sections between grid points are computed using linear interpolation in log-log space, accurately capturing the steep 1/v behavior in the thermal region and resonance structures.</p>
+                        </div>
+                        <div class="result-card">
+                            <h4>Competitive Processes</h4>
+                            <p>Each neutron interaction competes between four outcomes: fission, radiative capture, inelastic scattering, and elastic scattering - with probabilities dynamically calculated from the neutron's current energy.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Parte 2: Simulation Logic -->
+    <section>
+        <div class="container">
+            <div class="project-part fade-in">
+                <div class="part-header">
+                    <h2><i class="fas fa-dice"></i> Part 2: Monte Carlo Simulation</h2>
+                </div>
+                <div class="part-content">
+                    <h3>Neutron Life Cycle</h3>
+                    <p>The simulation follows a generation-based random walk approach, tracking each neutron through its complete life cycle:</p>
+                    <ul>
+                        <li><strong>Initialization</strong>: 1000 thermal neutrons (0.025 eV) injected into natural uranium</li>
+                        <li><strong>Isotope Selection</strong>: Macroscopic probability weighting (0.7% U-235 vs 99.3% U-238)</li>
+                        <li><strong>Interaction Sampling</strong>: Fission, capture, or scattering chosen by cross-section ratios</li>
+                        <li><strong>Fission Events</strong>: 2-3 new neutrons born with Watt Spectrum energies (MeV range)</li>
+                        <li><strong>Moderation</strong>: Elastic and inelastic collisions progressively slow down neutrons</li>
+                    </ul>
+                    
+                    <h3>Algorithm Details</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Process</th>
+                                <th>Implementation</th>
+                                <th>Physical Basis</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Fission</td>
+                                <td>Nu = 2.43 (thermal) / 2.50 (fast)</td>
+                                <td>Average neutrons per fission</td>
+                            </tr>
+                            <tr>
+                                <td>Capture</td>
+                                <td>Neutron removal</td>
+                                <td>Radiative capture (n, gamma)</td>
+                            </tr>
+                            <tr>
+                                <td>Inelastic Scattering</td>
+                                <td>Energy loss to 50-400 keV</td>
+                                <td>Threshold reaction, only fast neutrons</td>
+                            </tr>
+                            <tr>
+                                <td>Elastic Scattering</td>
+                                <td>Energy × factor (0.98-1.0)</td>
+                                <td>Billiard-ball collision moderation</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="results-grid">
+                        <div class="result-card">
+                            <h4>Generation Tracking</h4>
+                            <p>Neutron population is recorded at each generation, allowing visualization of population dynamics and detection of convergence, decay, or exponential growth.</p>
+                        </div>
+                        <div class="result-card">
+                            <h4>Population Bounds</h4>
+                            <p>Safety limits prevent runaway computation: simulation stops if population reaches zero (reaction dies) or exceeds 10,000 neutrons (reaction explodes).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Parte 3: Results -->
+    <section class="section-light">
+        <div class="container">
+            <div class="project-part fade-in">
+                <div class="part-header">
+                    <h2><i class="fas fa-chart-line"></i> Part 3: Results & Validation</h2>
+                </div>
+                <div class="part-content">
+                    <h3>Population Dynamics</h3>
+                    <p>The simulation output reveals the characteristic behavior of natural uranium under neutron bombardment:</p>
+                    <ul>
+                        <li><strong>Initial spike</strong>: Thermal neutrons encounter the high fission cross-section of U-235</li>
+                        <li><strong>Fast birth</strong>: Fission neutrons are born in the MeV range</li>
+                        <li><strong>Resonance trap</strong>: Slowing-down neutrons are captured by U-238 resonances</li>
+                        <li><strong>Subcritical decay</strong>: Population stabilizes below criticality</li>
+                    </ul>
+                    
+                    <h3>Result Visualization</h3>
+                    <div style="text-align: center; margin: 2rem 0;">
+                        <img src="results/simulation_result.png" alt="Neutron Population Simulation" style="max-width: 100%; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                    </div>
+                    
+                    <h3>Criticality Assessment</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Value</th>
+                                <th>Interpretation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>k_eff</td>
+                                <td>~0.983</td>
+                                <td>Subcritical (k &lt; 1)</td>
+                            </tr>
+                            <tr>
+                                <td>Fuel Composition</td>
+                                <td>0.7% U-235</td>
+                                <td>Natural uranium</td>
+                            </tr>
+                            <tr>
+                                <td>Dominant Loss Mechanism</td>
+                                <td>U-238 Resonance Capture</td>
+                                <td>Prevents chain reaction</td>
+                            </tr>
+                            <tr>
+                                <td>Enrichment Required</td>
+                                <td>&gt; 3-5% U-235</td>
+                                <td>For sustained criticality</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="results-grid">
+                        <div class="result-card">
+                            <h4>Physical Validation</h4>
+                            <p>The calculated k_eff ~0.983 confirms the well-established physics that natural uranium cannot sustain a chain reaction without enrichment or a moderator. This validates the simulation engine against known nuclear physics.</p>
+                        </div>
+                        <div class="result-card">
+                            <h4>Resonance Trap Effect</h4>
+                            <p>Unlike simplified models that predict infinite growth, the physics-aware model correctly captures the U-238 resonance capture phenomenon that dominates the intermediate energy range (1-1000 eV).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Conclusiones -->
+    <section>
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Key Insights & Physical Implications</h2>
+            </div>
+            <div class="results-grid fade-in">
+                <div class="result-card">
+                    <h4><i class="fas fa-atom"></i> Natural Uranium Limitations</h4>
+                    <p>The simulation demonstrates why natural uranium alone cannot sustain a chain reaction. The 99.3% U-238 content acts as a neutron poison through resonance capture, requiring enrichment or moderation for reactor applications.</p>
+                </div>
+                <div class="result-card">
+                    <h4><i class="fas fa-wave-square"></i> Energy Spectrum Evolution</h4>
+                    <p>Neutrons born fast (MeV) rapidly lose energy through scattering. This slowing-down process is where U-238 captures neutrons most effectively, creating the resonance trap that limits criticality.</p>
+                </div>
+                <div class="result-card">
+                    <h4><i class="fas fa-flask"></i> Reactor Design Insights</h4>
+                    <p>The results explain fundamental reactor design choices: enrichment increases fissile content, while moderators like water or graphite rapidly thermalize neutrons to avoid the resonance region entirely.</p>
+                </div>
+            </div>
+            
+            <div class="fade-in delay-1" style="text-align: center; margin-top: 3rem;">
+                <h3>Methodological Strengths</h3>
+                <p>This simulation demonstrates the power of Monte Carlo methods for nuclear physics. The combination of ENDF-based cross-section data, the Watt Spectrum, and generation-based random walks provides a physically accurate representation of neutron transport. The correct prediction of subcriticality validates both the mathematical model and the computational implementation.</p>
+                
+                <h3 style="margin-top: 2rem;">Future Research Directions</h3>
+                <p>Potential extensions include adding moderating materials (water, graphite), simulating enriched uranium compositions, implementing spatial geometry with leakage effects, and comparing results against established reactor physics codes. These enhancements would enable the study of full reactor core configurations and criticality benchmarks.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <h3>Interested in Collaboration?</h3>
+                <p>Feel free to reach out for professional opportunities or research projects.</p>
+                <div class="social-links">
+                    <a href="https://github.com/jmalfaro2019" target="_blank"><i class="fab fa-github"></i></a>
+                    <a href="https://www.linkedin.com/in/jose-miguel-alfaro-castillo-334327291" target="_blank"><i class="fab fa-linkedin"></i></a>
+                    <a href="mailto:alfaro.castillo.josemiguel@gmail.com"><i class="fas fa-envelope"></i></a>
+                </div>
+                <p>&copy; 2025 Jose Alfaro. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple animation on scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            
+            const fadeInOnScroll = function() {
+                fadeElements.forEach(element => {
+                    const elementTop = element.getBoundingClientRect().top;
+                    const elementVisible = 150;
+                    
+                    if (elementTop < window.innerHeight - elementVisible) {
+                        element.style.opacity = "1";
+                        element.style.transform = "translateY(0)";
+                    }
+                });
+            };
+            
+            // Set initial state
+            fadeElements.forEach(element => {
+                element.style.opacity = "0";
+                element.style.transform = "translateY(20px)";
+                element.style.transition = "opacity 0.8s ease, transform 0.8s ease";
+            });
+            
+            window.addEventListener('scroll', fadeInOnScroll);
+            fadeInOnScroll(); // Check on load
+        });
+    </script>
+</body>
+</html>
